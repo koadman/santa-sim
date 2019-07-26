@@ -8,9 +8,11 @@ package santa.simulator.genomes;
 
 import java.util.Arrays;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * @author kdforc0
+ * @author Aaron Darling
  *
  * A genomic mutable sequence.
  */
@@ -24,6 +26,7 @@ public final class SimpleSequence implements Sequence {
 	 * Internal representation: every byte corresponds to a nucleotide.
 	 */
 	private byte states[];
+	private TreeSet<Integer> breakpoints; /**< positions where recombination has occurred */
 
 	/**
 	 * Create a new sequence with given nucleotide length. The new sequence
@@ -31,6 +34,7 @@ public final class SimpleSequence implements Sequence {
 	 */
 	public SimpleSequence(int length) {
 		states = new byte[length];
+		breakpoints = new TreeSet<Integer>();
 	}
 
 	/**
@@ -42,6 +46,7 @@ public final class SimpleSequence implements Sequence {
 		for (int i = 0; i < nucleotides.length(); ++i) {
 			setNucleotide(i,  Nucleotide.parse(nucleotides.charAt(i)));
 		}
+		breakpoints = new TreeSet<Integer>();
 	}
 
 
@@ -50,18 +55,22 @@ public final class SimpleSequence implements Sequence {
 		if (states == null)
 			states = new byte[0];
 		this.states = states;
+		breakpoints = new TreeSet<Integer>();
 	}
 
 	public SimpleSequence(Sequence other) {
 		states = new byte[other.getLength()];
 
 		copyNucleotides(0, other, 0, other.getLength());
+		breakpoints = new TreeSet<Integer>();
+		breakpoints.addAll(other.getBreakpoints());
 	}
 
 	public SimpleSequence(SimpleSequence other) {
 		states = new byte[other.getLength()];
 
 		copyNucleotides(0, other, 0, other.getLength());
+		breakpoints = (TreeSet<Integer>) other.breakpoints.clone();
 	}
 
 
@@ -271,6 +280,14 @@ public final class SimpleSequence implements Sequence {
 		return SimpleSequence.getRecombinantSequence(parents, breakPoints);
 	}
 	
+	public void addBreakpoints(SortedSet<Integer> breakPoints) {
+		this.breakpoints.addAll(breakPoints);
+	}
+	
+	public SortedSet<Integer> getBreakpoints(){
+		return breakpoints;
+	}
+
 	/**
 	 * calculate how long the product of recombination will be.
 	 *
@@ -330,6 +347,7 @@ public final class SimpleSequence implements Sequence {
 		int nextBreakPoint =  seq.getLength();
 		System.arraycopy(seq.states, lastBreakPoint, 
 						 dest, lastBreakPoint, nextBreakPoint-lastBreakPoint);
+		product.addBreakpoints(breakPoints);
 		return(product);
 	}
 }

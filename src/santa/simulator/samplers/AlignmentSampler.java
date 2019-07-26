@@ -16,6 +16,7 @@ import santa.simulator.population.Population;
 /**
  * @author Andrew Rambaut
  * @author Alexei Drummond
+ * @author Aaron Darling
  * @version $Id: AlignmentSampler.java,v 1.6 2006/07/18 07:37:47 kdforc0 Exp $
  * Eddited by Abbas Jariani Sep 2013
  */
@@ -37,6 +38,7 @@ public class AlignmentSampler implements Sampler {
     private Map<Integer,Integer> schedule;
     private int replicate;
     private boolean consensus;
+    private boolean writeBreakpoints;
 
     /**
      * Construct an alignment sampler
@@ -48,7 +50,8 @@ public class AlignmentSampler implements Sampler {
      * @param fileName    name of the file to write the samples
      */
     public AlignmentSampler(Feature feature, Set<Integer> sites, int sampleSize, boolean consensus,
-                            Map<Integer,Integer> schedule, Format format, String label, String fileName) {
+                            Map<Integer,Integer> schedule, Format format, String label, String fileName,
+                            boolean breakpoints) {
         this.format = format;
         this.fileName = fileName;
 
@@ -64,6 +67,7 @@ public class AlignmentSampler implements Sampler {
         this.sampleSize = sampleSize;
         this.consensus = consensus;
         this.schedule = schedule;
+        this.writeBreakpoints = breakpoints;
     }
 
     public void initialize(int replicate) {
@@ -240,7 +244,13 @@ public class AlignmentSampler implements Sampler {
             for (Virus virus : sample) {
                 String l = substituteVariables(label, generation, i);
 
-                destination.println(">" + l);
+                String bps = "";
+                if(writeBreakpoints) {
+                	for(Integer bp : virus.getGenome().getSequence().getBreakpoints()) {
+                		bps += ":" + bp;
+                	}
+                }
+                destination.println(">" + l + bps);
                 destination.println(virus.getGenome().getSequence().getNucleotides());
 
                 i++;

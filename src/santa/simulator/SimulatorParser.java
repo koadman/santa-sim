@@ -166,6 +166,7 @@ public class SimulatorParser {
 	private final static String FORMAT = "format";
 	private final static String LABEL = "label";
 	private final static String CONSENSUS = "consensus";
+	private final static String BREAKPOINTS = "breakpoints";
 
 	private final static String ALLELE_FREQUENCY = "alleleFrequency";
 
@@ -1706,6 +1707,7 @@ public class SimulatorParser {
 		Map<Integer,Integer> schedule = null;
 		String label = null;
 		boolean consensus = false;
+		boolean breakpoints = false;
 
 		AlignmentSampler.Format format = AlignmentSampler.Format.NEXUS;
 
@@ -1755,6 +1757,15 @@ public class SimulatorParser {
 				}
 			} else if (e1.getName().equals(LABEL)) {
 				label = e1.getTextNormalize();
+			} else if (e1.getName().equals(BREAKPOINTS)) {
+				String booleanText = e1.getTextNormalize();
+				if (booleanText.equalsIgnoreCase("TRUE")) {
+					breakpoints = true;
+				} else if (booleanText.equalsIgnoreCase("FALSE")) {
+					breakpoints = false;
+				} else {
+					throw new ParseException("Error parsing <" + element.getName() + "> element: <" + CONSENSUS + "> value " + booleanText + " is unrecognized");
+				}
 			} else {
 				throw new ParseException("Error parsing <" + element.getName() + "> element: <" + e1.getName() + "> is unrecognized");
 			}
@@ -1765,7 +1776,7 @@ public class SimulatorParser {
 			throw new ParseException("Error parsing <" + element.getName() + "> element: specify only one of <" + SAMPLE_SIZE + "> or <" + SCHEDULE + ">.");
 		}
 
-		return new AlignmentSampler(f.feature, f.sites, sampleSize, consensus, schedule, format, label, fileName);
+		return new AlignmentSampler(f.feature, f.sites, sampleSize, consensus, schedule, format, label, fileName, breakpoints);
 	}
 
 	private Sampler parseTreeSampler(Element element, SamplingSchedule samplingSchedule, String fileName) throws ParseException {

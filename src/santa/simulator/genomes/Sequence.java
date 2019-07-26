@@ -78,4 +78,10 @@ public interface Sequence {
 	 * Create a hybrid sequence by combining two parents.
 	 */
 	Sequence recombineWith(Sequence other, SortedSet<Integer> breakPoints);
+
+	/**
+	 * Get the positions where recombination has occurred.
+	 */
+	SortedSet<Integer> getBreakpoints();
+
 }
